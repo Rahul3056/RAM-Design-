@@ -1,0 +1,60 @@
+#### **Example Verilog Code for Simple RAM**
+```verilog
+module ram_memory #(
+    parameter DATA_WIDTH = 8,
+    parameter ADDR_WIDTH = 4
+)(
+    input wire clk,
+    input wire we,
+    input wire [ADDR_WIDTH-1:0] addr,
+    input wire [DATA_WIDTH-1:0] data_in,
+    output reg [DATA_WIDTH-1:0] data_out
+);
+
+    reg [DATA_WIDTH-1:0] mem [(2**ADDR_WIDTH)-1:0];
+
+    always @(posedge clk) begin
+        if (we)
+            mem[addr] <= data_in;
+        else
+            data_out <= mem[addr];
+    end
+endmodule
+```
+
+#### **Testbench**
+```verilog
+module tb_ram_memory;
+    reg clk = 0;
+    reg we;
+    reg [3:0] addr;
+    reg [7:0] data_in;
+    wire [7:0] data_out;
+
+    ram_memory dut (
+        .clk(clk),
+        .we(we),
+        .addr(addr),
+        .data_in(data_in),
+        .data_out(data_out)
+    );
+
+    always #5 clk = ~clk;
+
+    initial begin
+        // Write operations
+        we = 1;
+        addr = 4'd0; data_in = 8'hAA; #10;
+        addr = 4'd1; data_in = 8'h55; #10;
+        addr = 4'd2; data_in = 8'hFF; #10;
+
+        // Read operations
+        we = 0;
+        addr = 4'd0; #10;
+        addr = 4'd1; #10;
+        addr = 4'd2; #10;
+
+        $finish;
+    end
+endmodule
+```
